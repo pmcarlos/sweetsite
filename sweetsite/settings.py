@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,9 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-yrimiwv&0n6$1+4@x)kh%a5($p*rwygk9gf=+23f+0)qyc^k+b'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -39,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tailwind',
     'theme',
-    'django_browser_reload'
+    'django_browser_reload',
+    "corsheaders"
 ]
 
 MIDDLEWARE = [
@@ -51,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsPostCsrfMiddleware",
 
 ]
 
@@ -118,9 +118,13 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
 STATIC_URL = 'static/'
+# Add these new lines
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -132,3 +136,29 @@ TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+
+from corsheaders.defaults import default_headers
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "https://miinvitado.com",
+    "https://gowedding.me"
+]
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "hx-request",
+    "hx-current-url",
+    "hx-target",
+    "hx-trigger",
+    "hx-trigger-name"
+]
+
+ENV = os.getenv("ENV", "local")
+CORE_DOMAIN_URL = os.getenv("CORE_DOMAIN_URL", "http://127.0.0.1:8000")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv("DEBUG", ENV == "local")
+
+if ENV != "local":
+    import django_heroku
+    django_heroku.settings(locals())
