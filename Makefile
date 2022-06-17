@@ -1,5 +1,14 @@
-run_tailwind:
+initialsetup:
+	cd theme/static_src && yarn
+
+runtailwind:
 	python manage.py tailwind start
 
-run_server:
-	python manage.py runserver
+runserver:
+	python manage.py runserver 8420
+
+migrations:
+	python manage.py makemigrations
+
+migrate:
+	python manage.py migrate
